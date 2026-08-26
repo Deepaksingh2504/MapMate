@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = "https://mapmate-knjo.onrender.com";
 
 // ── Places ──────────────────────────────────────────────────────────────────
 
@@ -64,7 +64,7 @@ export async function getNearbyPlacesFromOverpass(category: string, lat: number,
     return data.elements.map((el: any) => {
       const elLat = el.lat || el.center?.lat;
       const elLon = el.lon || el.center?.lon;
-      
+
       return {
         id: el.id,
         lat: elLat,
@@ -129,8 +129,8 @@ export async function calculateRoute(
     const data = await response.json();
 
     if (!response.ok || data.error) {
-      const errorMsg = data.error === "Failed to calculate route" 
-        ? "MapMate couldn't find a drivable route between these locations." 
+      const errorMsg = data.error === "Failed to calculate route"
+        ? "MapMate couldn't find a drivable route between these locations."
         : (data.error || "Failed to calculate route");
       return { route: null, error: errorMsg };
     }
