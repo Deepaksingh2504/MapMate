@@ -4,7 +4,7 @@ const API_BASE = "https://mapmate-knjo.onrender.com";
 
 export async function fetchCustomPlaces(query: string, lat: number, lon: number, radius = 5000) {
   try {
-    const url = new URL(`${API_BASE}/places/search`);
+    const url = new URL(`${API_BASE}/api/places/search`);
     if (query) url.searchParams.append("q", query);
     url.searchParams.append("lat", lat.toString());
     url.searchParams.append("lon", lon.toString());
@@ -150,7 +150,7 @@ export async function calculateRoute(
 
 export async function saveFavourite(placeId: number, token: string) {
   try {
-    const response = await fetch(`${API_BASE}/favourites`, {
+    const response = await fetch(`${API_BASE}/api/favourites`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -167,7 +167,7 @@ export async function saveFavourite(placeId: number, token: string) {
 
 export async function fetchFavourites(token: string) {
   try {
-    const response = await fetch(`${API_BASE}/favourites`, {
+    const response = await fetch(`${API_BASE}/api/favourites`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return await response.json();
