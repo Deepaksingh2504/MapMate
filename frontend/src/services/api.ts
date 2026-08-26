@@ -33,50 +33,29 @@ const OSM_TAGS: Record<string, string> = {
   park: "leisure=park"
 };
 
-export async function getNearbyPlacesFromOverpass(category: string, lat: number, lon: number, radius = 5000) {
+export async function getNearbyPlacesFromOverpass(
+  category: string,
+  lat: number,
+  lon: number,
+  radius = 5000
+) {
   try {
-    const tag = OSM_TAGS[category.toLowerCase()] || `amenity=${category.toLowerCase()}`;
-    const [tagKey, tagValue] = tag.split('=');
+    const url = new URL(`${API_BASE}/api/places/nearby`);
 
-    // Build Overpass QL query
-    const query = `
-      [out:json][timeout:25];
-      (
-        node["${tagKey}"="${tagValue}"](around:${radius},${lat},${lon});
-        way["${tagKey}"="${tagValue}"](around:${radius},${lat},${lon});
-        relation["${tagKey}"="${tagValue}"](around:${radius},${lat},${lon});
-      );
-      out center;
-    `;
+    url.searchParams.append("category", category);
+    url.searchParams.append("lat", lat.toString());
+    url.searchParams.append("lon", lon.toString());
+    url.searchParams.append("radius", radius.toString());
 
-    const url = `https://overpass-api.de/api/interpreter`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `data=${encodeURIComponent(query)}`
-    });
+    const response = await fetch(url.toString());
 
-    if (!response.ok) throw new Error("Failed to fetch from Overpass API");
-    const data = await response.json();
+    if (!response.ok) {
+      throw new Error("Failed to fetch nearby places");
+    }
 
-    return data.elements.map((el: any) => {
-      const elLat = el.lat || el.center?.lat;
-      const elLon = el.lon || el.center?.lon;
-
-      return {
-        id: el.id,
-        lat: elLat,
-        lon: elLon,
-        display_name: el.tags?.name || `${category} (Unknown Name)`,
-        name: el.tags?.name || `${category}`,
-        category: category,
-        address: [el.tags?.['addr:street'], el.tags?.['addr:city']].filter(Boolean).join(", ") || "No address provided",
-      };
-    }).filter((el: any) => el.lat && el.lon); // ensure valid coords
+    return await response.json();
   } catch (err) {
-    console.error("Overpass API Error:", err);
+    console.error("Nearby places API Error:", err);
     return [];
   }
 }
@@ -180,7 +159,7 @@ export async function fetchFavourites(token: string) {
 // ── Auth ────────────────────────────────────────────────────────────────────
 
 export async function loginUser(credentials: any) {
-  const response = await fetch(`${API_BASE}/auth/login`, {
+  const response = await fetch(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
@@ -189,7 +168,7 @@ export async function loginUser(credentials: any) {
 }
 
 export async function registerUser(credentials: any) {
-  const response = await fetch(`${API_BASE}/auth/register`, {
+  const response = await fetch(`${API_BASE}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
@@ -198,7 +177,7 @@ export async function registerUser(credentials: any) {
 }
 
 export async function getMe(token: string) {
-  const response = await fetch(`${API_BASE}/auth/me`, {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return await response.json();
