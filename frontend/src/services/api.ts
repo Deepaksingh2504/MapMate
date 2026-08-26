@@ -1,4 +1,4 @@
-const API_BASE = "https://mapmate-knjo.onrender.com/api";
+const API_BASE = "https://mapmate-knjo.onrender.com";
 
 // ── Places ──────────────────────────────────────────────────────────────────
 
