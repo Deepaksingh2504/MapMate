@@ -119,7 +119,7 @@ export async function calculateRoute(
   end: { lat: number; lon: number }
 ): Promise<RouteResponse> {
   try {
-    const url = new URL(`${API_BASE}/route`);
+    const url = new URL(`${API_BASE}/api/route`);
     url.searchParams.append("start_lat", start.lat.toString());
     url.searchParams.append("start_lon", start.lon.toString());
     url.searchParams.append("end_lat", end.lat.toString());
