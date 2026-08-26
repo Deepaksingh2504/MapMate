@@ -19,19 +19,6 @@ export async function fetchCustomPlaces(query: string, lat: number, lon: number,
   }
 }
 
-const OSM_TAGS: Record<string, string> = {
-  hotel: "tourism=hotel",
-  restaurant: "amenity=restaurant",
-  cafe: "amenity=cafe",
-  hospital: "amenity=hospital",
-  atm: "amenity=atm",
-  fuel: "amenity=fuel",
-  pharmacy: "amenity=pharmacy",
-  school: "amenity=school",
-  university: "amenity=university",
-  supermarket: "shop=supermarket",
-  park: "leisure=park"
-};
 
 export async function getNearbyPlacesFromOverpass(
   category: string,
