@@ -12,20 +12,20 @@ export function getDistance(lat1: number, lon1: number, lat2: number, lon2: numb
 }
 
 export function checkDeviation(
-  currentPos: { lat: number, lon: number }, 
-  routeLine: [number, number][], 
+  currentPos: { lat: number, lon: number },
+  routeLine: [number, number][],
   thresholdMeters = 50
 ): boolean {
   if (!routeLine || routeLine.length === 0) return false;
-  
+
   let minDistance = Infinity;
-  
+
   for (let i = 0; i < routeLine.length; i++) {
     const dist = getDistance(currentPos.lat, currentPos.lon, routeLine[i][0], routeLine[i][1]);
     if (dist < minDistance) {
       minDistance = dist;
     }
   }
-  
+
   return minDistance > thresholdMeters;
 }

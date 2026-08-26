@@ -29,7 +29,7 @@ export default function RoutePanel({ source, destination, routeData, isNavigatin
 
   return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-[400px] rounded-2xl bg-white shadow-2xl border border-slate-100 overflow-hidden">
-      
+
       {/* Header */}
       <div className="bg-blue-600 px-5 pt-4 pb-3 text-white">
         <div className="flex items-center gap-2 mb-1">

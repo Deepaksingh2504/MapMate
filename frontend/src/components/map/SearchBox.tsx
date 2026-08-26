@@ -52,7 +52,7 @@ export default function SearchBox({ places, history, onPlaceSelected, onSearch, 
     setIsFocused(false);
     onAddToHistory(place);
     // Clear results so they don't pop up again unless user types
-    onSearch(""); 
+    onSearch("");
   };
 
   async function handleSearch(e?: React.FormEvent, directQuery?: string) {
@@ -72,7 +72,7 @@ export default function SearchBox({ places, history, onPlaceSelected, onSearch, 
 
   return (
     <div ref={containerRef} className="absolute left-4 top-4 z-[1010] w-[400px] max-w-[calc(100vw-32px)]">
-      <form 
+      <form
         onSubmit={handleSearch}
         className="flex items-center rounded-2xl bg-white px-4 py-3 shadow-md border border-slate-100"
       >
@@ -107,7 +107,7 @@ export default function SearchBox({ places, history, onPlaceSelected, onSearch, 
 
       {isFocused && (
         <div className="mt-2 overflow-hidden rounded-2xl bg-white shadow-xl border border-slate-100 max-h-[60vh] overflow-y-auto">
-          
+
           {/* Default State: History and Categories */}
           {!query && places.length === 0 && (
             <div className="py-2">
@@ -115,7 +115,7 @@ export default function SearchBox({ places, history, onPlaceSelected, onSearch, 
                 <div className="mb-4">
                   <div className="px-5 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Recent Searches</div>
                   {history.map((place, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       onClick={() => handleSelect(place)}
                       className="flex cursor-pointer items-center gap-4 px-5 py-3 hover:bg-slate-50 transition"
@@ -129,12 +129,12 @@ export default function SearchBox({ places, history, onPlaceSelected, onSearch, 
                   ))}
                 </div>
               )}
-              
+
               <div>
                 <div className="px-5 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Explore Nearby</div>
                 <div className="grid grid-cols-3 gap-2 px-4 pb-4 pt-2">
                   {CATEGORIES.map((cat) => (
-                    <button 
+                    <button
                       key={cat.name}
                       onClick={() => handleSearch(undefined, cat.query)}
                       className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-blue-50 hover:border-blue-100 hover:text-blue-600 text-slate-600 transition group"
@@ -151,7 +151,7 @@ export default function SearchBox({ places, history, onPlaceSelected, onSearch, 
           {/* Search Results */}
           {places.length > 0 && (
             <div>
-              {places.map((place)=>(
+              {places.map((place) => (
                 <div
                   key={place.id || place.lat}
                   onClick={() => handleSelect(place)}

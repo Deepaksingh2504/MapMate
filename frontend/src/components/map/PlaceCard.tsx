@@ -23,7 +23,7 @@ export default function PlaceCard({ place, onClose, onRoute, onSave }: PlaceCard
 
   return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[420px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[1001]">
-      
+
       {/* Close button */}
       <button
         onClick={onClose}
