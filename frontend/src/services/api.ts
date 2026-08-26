@@ -1,23 +1,23 @@
-const API_BASE = "const API_BASE = "https://mapmate-knjo.onrender.com.onrender.com/api";";
+const API_BASE = "https://mapmate-knjo.onrender.com/api";
 
-  // ── Places ──────────────────────────────────────────────────────────────────
+// ── Places ──────────────────────────────────────────────────────────────────
 
-  export async function fetchCustomPlaces(query: string, lat: number, lon: number, radius = 5000) {
-    try {
-      const url = new URL(`${API_BASE}/places/search`);
-      if (query) url.searchParams.append("q", query);
-      url.searchParams.append("lat", lat.toString());
-      url.searchParams.append("lon", lon.toString());
-      url.searchParams.append("radius", radius.toString());
+export async function fetchCustomPlaces(query: string, lat: number, lon: number, radius = 5000) {
+  try {
+    const url = new URL(`${API_BASE}/places/search`);
+    if (query) url.searchParams.append("q", query);
+    url.searchParams.append("lat", lat.toString());
+    url.searchParams.append("lon", lon.toString());
+    url.searchParams.append("radius", radius.toString());
 
-      const response = await fetch(url.toString());
-      if (!response.ok) throw new Error("Failed to fetch custom places");
-      return await response.json();
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error("Failed to fetch custom places");
+    return await response.json();
+  } catch (err) {
+    console.error(err);
+    return [];
   }
+}
 
 const OSM_TAGS: Record<string, string> = {
   hotel: "tourism=hotel",
