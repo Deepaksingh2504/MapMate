@@ -20,7 +20,7 @@ const searchHandler: RequestHandler = async (
 
   try {
     let query = `
-      SELECT id, name, category, address, 
+      SELECT id, name, category, address,
              ST_Y(location::geometry) as lat,
              ST_X(location::geometry) as lon,
              ST_Distance(
@@ -49,6 +49,7 @@ const searchHandler: RequestHandler = async (
     res.json(result.rows);
   } catch (error) {
     console.error("Search error:", error);
+
     res.status(500).json({
       error: "Failed to search places",
     });
@@ -87,53 +88,96 @@ const nearbyHandler: RequestHandler = async (
   }
 
   try {
+    const categoryName = String(category).toLowerCase();
+
     const tag =
-      OSM_TAGS[String(category).toLowerCase()] ||
-      `amenity=${String(category).toLowerCase()}`;
+      OSM_TAGS[categoryName] || `amenity=${categoryName}`;
 
     const [tagKey, tagValue] = tag.split("=");
 
-    const query = `
-      [out:json][timeout:25];
-      (
-        node["${tagKey}"="${tagValue}"](around:${radius},${lat},${lon});
-        way["${tagKey}"="${tagValue}"](around:${radius},${lat},${lon});
-        relation["${tagKey}"="${tagValue}"](around:${radius},${lat},${lon});
-      );
-      out center;
-    `;
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+    const searchRadius = Number(radius);
 
-    const response = await fetch(
-      "https://overpass-api.de/api/interpreter",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          "User-Agent": "MapMate/1.0",
-        },
-        body: `data=${encodeURIComponent(query)}`,
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-
-      console.error(
-        "Overpass error:",
-        response.status,
-        errorText
-      );
-
-      res.status(502).json({
-        error: "Overpass API request failed",
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      !Number.isFinite(searchRadius)
+    ) {
+      res.status(400).json({
+        error: "Invalid latitude, longitude or radius",
       });
       return;
     }
 
-    const data = await response.json();
+    const query = `
+      [out:json][timeout:25];
+      (
+        node["${tagKey}"="${tagValue}"](around:${searchRadius},${latitude},${longitude});
+        way["${tagKey}"="${tagValue}"](around:${searchRadius},${latitude},${longitude});
+        relation["${tagKey}"="${tagValue}"](around:${searchRadius},${latitude},${longitude});
+      );
+      out center;
+    `;
 
-    const places = data.elements
+    const encodedQuery = encodeURIComponent(query);
+
+    // Try the main Overpass server first.
+    // If it fails, try a second public Overpass server.
+    const overpassServers = [
+      `https://overpass-api.de/api/interpreter?data=${encodedQuery}`,
+      `https://overpass.kumi.systems/api/interpreter?data=${encodedQuery}`,
+    ];
+
+    let data: any = null;
+    let lastError = "";
+
+    for (const url of overpassServers) {
+      try {
+        console.log(`Trying Overpass server: ${url.split("?")[0]}`);
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "MapMate/1.0",
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+
+          console.error(
+            `Overpass server returned ${response.status}:`,
+            errorText.slice(0, 500)
+          );
+
+          lastError = `Overpass returned ${response.status}`;
+          continue;
+        }
+
+        data = await response.json();
+
+        console.log(
+          `Overpass success: ${data.elements?.length || 0} elements`
+        );
+
+        break;
+      } catch (error) {
+        console.error("Overpass server request failed:", error);
+        lastError = "Overpass request failed";
+      }
+    }
+
+    if (!data) {
+      res.status(502).json({
+        error: "Unable to contact OpenStreetMap nearby places service",
+        details: lastError,
+      });
+      return;
+    }
+
+    const places = (data.elements || [])
       .map((el: any) => {
         const elLat = el.lat ?? el.center?.lat;
         const elLon = el.lon ?? el.center?.lon;
@@ -144,7 +188,8 @@ const nearbyHandler: RequestHandler = async (
           lon: elLon,
           display_name:
             el.tags?.name || `${category} (Unknown Name)`,
-          name: el.tags?.name || `${category}`,
+          name:
+            el.tags?.name || `${category}`,
           category: String(category),
           address:
             [
@@ -155,11 +200,15 @@ const nearbyHandler: RequestHandler = async (
               .join(", ") || "No address provided",
         };
       })
-      .filter((place: any) => place.lat != null && place.lon != null);
+      .filter(
+        (place: any) =>
+          place.lat != null &&
+          place.lon != null
+      );
 
     res.json(places);
   } catch (error) {
-    console.error("Overpass request error:", error);
+    console.error("Nearby places error:", error);
 
     res.status(500).json({
       error: "Failed to fetch nearby places",
