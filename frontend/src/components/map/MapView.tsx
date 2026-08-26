@@ -141,7 +141,8 @@ export default function MapView({
       />
 
       {/* User's live location marker */}
-      <LocationMarker />
+      <LocationMarker userPos={userPos} />
+
 
       {/* Search result / destination markers */}
       {places.map((place, idx) => {
